@@ -3,7 +3,10 @@ package com.example.myapplication0324
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import androidx.core.app.RemoteInput
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.media.AudioAttributes
 import android.media.RingtoneManager
@@ -64,14 +67,16 @@ class MainActivity : AppCompatActivity() {
             builder.setWhen(System.currentTimeMillis())
             builder.setContentTitle("My First Notification")
             builder.setContentText("My First Notification content")
+            builder.setLargeIcon(BitmapFactory.decodeResource(resources,R.drawable.ic_launcher_background))
 
             //7. 알림이 발생 후 터치 시 내가 지정한 액티비티로 화면 전환하는 pendingIntent 기능부여하기
             //7. 알림이 발생 후 터치 시 broadCast 화면으로 정보를 알려준다.
 //            var intent = Intent(this, DetailActivity::class.java)
 //            val pendingIntent = PendingIntent.getActivity(this,10,intent, PendingIntent.FLAG_IMMUTABLE)
 //            builder.setContentIntent(pendingIntent)
+
             //8.알림에 액션 등록하기
-            val actionIntent = Intent(this, OneReceiver::class.java)
+/*            val actionIntent = Intent(this, OneReceiver::class.java)
             val actionPendingIntent =
                 PendingIntent.getBroadcast(this, 20, actionIntent, PendingIntent.FLAG_IMMUTABLE)
             builder.addAction(
@@ -80,8 +85,26 @@ class MainActivity : AppCompatActivity() {
                     "Action",
                     actionPendingIntent
                 ).build()
+            )*/
+
+            //9. 알림창에서 데이터를 입력하면 해당디는 데이터를 브로드 캐스트로 받아옴.
+            //9-1 알림창에서 입력할 수 있는 기능부여
+            val remoteInput = RemoteInput.Builder("kjs_noti_reply").run {
+                setLabel("답장글써주세요")
+                build()
+            }
+            val actionIntent = Intent(this, OneReceiver::class.java)
+            val actionPendingIntent =
+                PendingIntent.getBroadcast(this, 30, actionIntent, PendingIntent.FLAG_MUTABLE)
+            builder.addAction(
+                NotificationCompat.Action.Builder(
+                    R.drawable.send_24,
+                    "답장",
+                    actionPendingIntent
+                ).addRemoteInput(remoteInput).build()
             )
-            //9. manager 알림발생
+
+            //10. manager 알림발생
             manager.notify(11, builder.build())
         }
         binding.btnNotificateCancel.setOnClickListener {
